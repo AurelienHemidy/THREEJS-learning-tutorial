@@ -1,0 +1,35 @@
+*
+{
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body
+{
+    overflow-x: hidden;
+    background-color: #090810;
+}
+
+.webgl
+{
+    /* position: fixed; */
+    top: 0;
+    left: 0;
+    outline: none;
+    height: 100vh;
+}
+
+section {
+    height: 100vh;
+    color: white;
+}
+
+#scrollProgress {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 99;
+    font-size: 3vh;
+    color: white;
+}
