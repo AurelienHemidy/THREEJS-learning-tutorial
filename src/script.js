@@ -36,23 +36,24 @@ const meshesToAnimate = [];
 const col = 3;
 const row = 2;
 
-const geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
+const geometry = new THREE.PlaneGeometry(1.5, 1.5, 32, 32)
 
-const count = geometry.attributes.position.count
-const randoms = new Float32Array(count)
+// const count = geometry.attributes.position.count
+// const randoms = new Float32Array(count)
 
-for(let i = 0; i < count; i++)
-{
-    randoms[i] = Math.random()
-}
+// for(let i = 0; i < count; i++)
+// {
+//     randoms[i] = Math.random()
+// }
 
-geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+// geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
 
 
 // Material
 const material = new THREE.ShaderMaterial({
     vertexShader: testVertexShader,
     fragmentShader: testFragmentShader,
+    side: THREE.DoubleSide,
     uniforms:
     {
         uFrequency: { value: new THREE.Vector2(10, 5) },
@@ -66,15 +67,13 @@ gui.add(material.uniforms.uFrequency.value, 'x').min(0).max(20).step(0.01).name(
 gui.add(material.uniforms.uFrequency.value, 'y').min(0).max(20).step(0.01).name('frequencyY')
 
 // Mesh
-for (let i = 0; i < col; i++) {
-    for (let t = 0; t < row; t++) {
-        const mesh = new THREE.Mesh(geometry, material);
+for (let i = -0.4; i < col - 0.4; i++) {
+    const mesh = new THREE.Mesh(geometry, material);
         mesh.scale.y = 2 / 3;
-        let margin = 0.2;
-        mesh.position.set(i + margin * i, t, 0);
+        let margin = 1;
+        mesh.position.set(i + margin * i, 0, 0);
         scene.add(mesh);
         meshesToAnimate.push(mesh);
-    }
 }
 
 function lerp(x, y, a) {
@@ -86,14 +85,23 @@ function scalePercent(start, end) {
     return (scrollPercent - start) / (end - start)
 };
 
+// Array of all our animations
 const animationScripts = [];
+
+const animationObject = {
+	start : "pourcentage auquel l’animation commence à se jouer",
+	end: "pourcentage auquel l’animation arrête de se jouer",
+	func: () => {
+		console.log("fonction à exécuter lorsque le scroll se situe entre les deux valeurs ci-dessus")
+	}
+ }
 
 animationScripts.push({
     start: 10,
     end: 25,
     func: () => {
         material.uniforms.uFrequency.value.x = lerp(5, 6, scalePercent(10, 25));
-        material.uniforms.uFrequency.value.Y = lerp(5, 10, scalePercent(10, 25));
+        material.uniforms.uFrequency.value.y = lerp(5, 10, scalePercent(10, 25));
     },
 })
 animationScripts.push({
@@ -111,12 +119,11 @@ animationScripts.push({
     end: 101,
     func: () => {
         material.uniforms.uTime.value = lerp(0, 5, scalePercent(0, 50));
-        // meshesToAnimate[1].position.y = lerp(1, -0.5, scalePercent(0, 101))
-        // meshesToAnimate[3].position.y = lerp(-0.5, 1, scalePercent(0, 101));
-        // meshesToAnimate[5].position.y = lerp(1, -0.5, scalePercent(0, 101))
+        meshesToAnimate[1].position.y = lerp(1, 0, scalePercent(0, 101))
     },
 })
 
+// Function to play all our animations if they're in range
 function playScrollAnimations() {
     animationScripts.forEach((a) => {
         if (scrollPercent >= a.start && scrollPercent < a.end) {
@@ -129,8 +136,11 @@ function playScrollAnimations() {
 let scrollPercent = 0
 
 window.addEventListener('scroll', () => {
-    //calculate the current scroll progress as a percentage
-        scrollPercent =((document.documentElement.scrollTop || document.body.scrollTop) / ((document.documentElement.scrollHeight || document.body.scrollHeight) - document.documentElement.clientHeight)) *100;
+    // Calculate the current scroll progress as a percentage
+        scrollPercent = ((document.documentElement.scrollTop || document.body.scrollTop) / 
+        ((document.documentElement.scrollHeight || document.body.scrollHeight) - 
+        document.documentElement.clientHeight)) 
+        * 100;
         (document.getElementById('scrollProgress')).innerText =
             'Scroll Progress : ' + scrollPercent.toFixed(2)
 });
@@ -192,9 +202,6 @@ const tick = () =>
 
     // Update material
     material.uniforms.uTime.value = elapsedTime
-
-    // Update controls
-    // controls.update()
 
     playScrollAnimations();
 
